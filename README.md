@@ -1,7 +1,7 @@
 # toontown-xlax
 A patch of xlax, to provide compatibility for usage as a Toontown multicontroller on Linux. 
 
-![GIF Showcase](https://powwu.s-ul.eu/hJRxrTjV)
+[GIF Showcase](https://powwu.s-ul.eu/hJRxrTjV)
 
 ## Building
 In the toontown-xlax directory:
