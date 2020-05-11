@@ -1,0 +1,23 @@
+#
+# .mkxlax - config file for mkxlax
+#
+# Distriubition sample file.
+#
+#   tile: -group tilexlax -dx 510 -wrapx 1000 -wrapdy 345 -geometry +740-2
+#   use this layout by running: "mkxlax -layout tile"
+#
+
+# tile
+# tile standard 80x24 xterms (with the author's default font) across one
+# monitor of width 1280, and place xlax at lower right corner
+
+tile: -group tilexlax -dx 510 -wrapx 1000 -wrapdy 345 -geometry -2-2
+
+
+#
+# This example cascades a set of five windows, with preset sendstrings
+# use this layout by running: "mkxlax -layout myhosts"
+#
+
+myhosts: -group myhosts -dx 10 -dy 100 host1 host2 host3 host4 host5
+

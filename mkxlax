@@ -1,0 +1,152 @@
+#!/usr/bin/perl
+
+#it doesn't make senes to use both -wrapx and -wrapy, and you always use
+# the opposite axis in the -wrapd? option
+
+if ($#ARGV == -1) {
+  &usage;
+  exit(0);
+}
+
+if (-e "$ENV{'HOME'}/.mkxlax") {
+  &loadconfig("$ENV{'HOME'}/.mkxlax");
+}
+
+$opts{"group"}="mkxlax";
+$opts{"x"}=0;
+$opts{"y"}=0;
+$opts{"dx"}=0;
+$opts{"dy"}=0;
+$opts{"wrapx"}=0;
+$opts{"wrapy"}=0;
+$opts{"wrapdx"}=0;
+$opts{"wrapdy"}=0;
+$opts{"termsize"}="80x24";
+$opts{"termopts"}="";
+$opts{"geometry"}="+2-2";
+
+@ARGV = &parse_option_array(@ARGV);
+
+$xlax_group=$opts{"group"};
+$ix=$opts{"x"};
+$iy=$opts{"y"};
+$dx=$opts{"dx"};
+$dy=$opts{"dy"};
+$wrapx=$opts{"wrapx"};
+$wrapy=$opts{"wrapy"};
+$wrapdx=$opts{"wrapdx"};
+$wrapdy=$opts{"wrapdy"};
+$termsize=$opts{"termsize"};
+$termopts=$opts{"termopts"};
+
+if ($dx == 0 && $dy == 0) {
+  $dx=40; $dy=80;
+  if ($wrapx == 0 && $wrapy == 0) {
+    $wrapy=750; $wrapdx=200;
+  }
+}
+
+$x=$ix; $y=$iy;
+for ($i=0; $i<=$#ARGV; ++$i) {
+  system("xterm -geometry $termsize+$x+$y -name \"$xlax_group:$ARGV[$i]\" -xrm 'XTerm*allowSendEvents: true' $termopts &");
+  sleep(1);
+  $x+=$dx;  if ($wrapx && $x>$wrapx) { $x=$ix; $y+=$wrapdy; }
+  $y+=$dy;  if ($wrapy && $y>$wrapy) { $y=$iy; $x+=$wrapdx; }
+}
+
+sleep(2);
+
+$x=(0)+2;
+system("xlax -geometry $opts{'geometry'} -prefix $xlax_group: -find &");
+
+#
+# END OF MAIN
+#
+
+sub loadconfig {
+  my $file=shift(@_);
+  my $prev="";
+  my $lay="";
+
+  if (! open (CONF,$file)) {
+    print STDERR "Can't open config file $file: $!\n";
+    return;
+  }
+  while(<CONF>) {
+    next if (/^[ \t]*#/);    #skip comment lines
+    next if (/^[ \t]*$/);    #skip blank lines
+    chomp;
+
+    if (/\\ *$/) {
+      $cont=1;
+      s/\\ *$//;
+    } else {
+      $cont=0;
+    }
+
+    if ($prev ne "") {
+      $layout{$prev} .= " $_";
+      $prev="";
+    } else {
+      @words=split(' ');
+      if ($words[0] =~ /:$/) {
+	$lay=shift(@words);
+	$lay =~ s/:$//;
+	$layout{$lay} = join(" ",@words);
+      } else {
+	print STDERR "Warning: bad config file!\n";
+      }
+    }
+    if ($cont) {
+      $prev=$lay;
+    }
+  }
+  close($file);
+}
+
+sub parse_option_array {
+  my @args=@_;
+  my $o;
+  my $lname;
+
+  while (substr($args[0],0,1) eq "-") {
+    $o=shift(@args);
+    last if ($o eq "--");
+    $o=substr($o,1);
+    if ($o eq "layout") {
+      $lname=shift(@args); 
+      if (defined($layout{$lname})) {
+	my @tmp=split(' ',$layout{$lname});
+	push (@args, &parse_option_array(@tmp));
+      }
+      next;
+    }
+    if (! defined($opts{$o})) {
+      print "unknown option: -$o\n";
+      &usage;
+      exit(1);
+    }
+    $opts{$o}=shift(@args);
+  }
+  return(@args);
+}
+
+
+sub usage {
+  print "Usage: mkxlax [options] string [more strings]\n";
+  print "Options:\n";
+  print "  -group name          the prefix to use in xlax\n";
+  print "  -x N                 the initial x position of first window\n";
+  print "  -y N                 the initial x position of first window\n";
+  print "  -dx N                the offset in x for additional windows\n";
+  print "  -dy N                the offset in y for additional windows\n";
+  print "  -wrapx N             wrap x back to initial value when if >= N\n";
+  print "  -wrapy N             wrap y back to initial value when if >= N\n";
+  print "  -wrapdx N            when wrapping (either x or y) add N to x\n";
+  print "  -wrapdy N            when wrapping (either x or y) add N to y\n";
+  print "  -termsize WxH        size of the terminals to create\n";
+  print "  -termopts options    additional xterm options\n";
+  print "  -geometry geom       X11 geometry string for xlax window\n";
+  print "  --                   stop option processing here\n";
+  print "         (in case a window string needs to start with a dash)\n";
+}

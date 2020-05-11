@@ -1,0 +1,182 @@
+.TH MKXLAX 1 "Release 5" "X Version 11"
+.SH NAME
+mkxlax - xlax and xterm startup program
+.SH SYNOPSIS
+.B "mkxlax"
+[options] \fIsendString\fP [\fImore sendStrings\fP ...]
+.SH DESCRIPTION
+.PP
+.I Mkxlax
+is an perl script that will start up a number of xterms configured to work
+together with xlax, and then start up an xlax to communicate with the
+xterms.
+
+.I Mkxlax
+will start an xterm for each argument (send string) provided.
+Each xterm will have it's name hint (the `-name' option) set to
+xlax:sendString, where the sendString is the argument provided to
+.I mkxlax.
+The xterms will all be started with send events enabled (required for xlax).
+
+The xterms will be arranged in a cascasde from upper left to lower right.
+Other arrangements are possible based on the provided options.
+
+.SH OPTIONS
+.TP 8
+.BI \-group " name"
+An alternate prefix should be used with xlax instead of `xlax:'.  This
+allows multiple groups of xlax windows to be run at the same time without
+interfering with each other.
+.TP 8
+.BI \-layout " name"
+Selects a predefined, named layout screen (from your $HOME/.mkxlax file),
+and uses that layout information (and group name, if given) for the
+created windows.
+.TP 8
+.BI \-x " num"
+The starting x location of the first xterm
+.TP 8
+.BI \-y " num"
+The starting y location of the first xterm
+.TP 8
+.BI \-dx " num"
+The amount to add in x to the position of each additional xterm
+.TP 8
+.BI \-dy " num"
+The amount to add in y to the position of each additional xterm
+.TP 8
+.BI \-wrapx " num"
+If x is greater than this value, x wraps back around to it's starting value.
+.TP 8
+.BI \-wrapy " num"
+If y is greater than this value, y wraps back around to it's starting value.
+.TP 8
+.BI \-wrapdx " num"
+If a wrap occurs, add this value to x.  Typically this is used together with
+`-wrapy', so that when y returns to zero, x is shifted.
+.TP 8
+.BI \-wrapdy " num"
+If a wrap occurs, add this value to y.  Typically this is used together with
+`-wrapx', so that when x returns to zero, y is shifted.
+
+.TP 8
+.BI \-termsize " WIDTHxHEIGHT"
+The width and height (columns and rows) for the xterm that will be started.
+Note that this is not a full geometry specifcation, as mkxlax handles the
+window positioning.  Default is "80x24"
+.TP 8
+.BI \-termopts " optionstring"
+Additional options to pass on to the xterm.  String must be quoted if it
+contains spaces.  Also, you can not use geometry or name options here.
+.TP 8
+.BI \-geometry " geometrystring"
+geometry for the xlax window (NOT the xterms).  This is a standard format
+X11 geometry, e.g. WIDTHxHEIGHT+XOFFSET+YOFFSET.
+
+.TP 8
+.B \--
+Ends option processing (in case a sendString needs to start with a dash).
+
+.PP
+If no options are given, the defaults are
+`-x 0 -y 0 -dx 20 -dy 50 -wrapy 750 -wrapdx 200'
+
+It's possible to provide options that probably don't make any sense.  The
+EXAMPLES section shows a few reasonable usages.
+
+.SH LAYOUT CONFIGURATION
+Custom layouts can be added by putting them in the configuration file
+.I .mkxlax
+in your home directory.  The file contains lines with a layout name
+followed by a colon, and then command line options to set for that layout.
+For example:
+.RS
+.\" .LP
+.nf
+  tile: -group tilexlax -dx 510 -wrapx 1000 -wrapdy 345 -geometry +740-2
+\f1
+.fi
+.RE
+This creates a layout called "tile", with those options set.  Once this
+is in your
+.I .mkxlax
+file, you can then run:
+.RS
+.\" .LP
+.nf
+  mkxlax -layout tile host1 host2 ...
+\f1
+.fi
+.RE
+And all of the options associated with "tile" will apply.  Note that the
+config file will override any command-line options which are before
+the "-layout"; command-line options
+after the "-layout" will override those in the config file.
+
+You can also list sendStrings after the options in the layout
+configuration, so a frequently used list of strings can be accessed
+with a simple layout.  Any additional sendStrings provided on the
+command line will be added to those found in the layout.
+
+
+.SH EXAMPLES
+This starts up five xterms with the default cascade positioning.
+.RS
+.\" .LP
+.nf
+example% mkxlax host1 host2 host3 host4 host5
+\f1
+.fi
+.RE
+
+If you run more than one group of
+.I mkxlax
+windows, you need different
+group names, otherwise later xlaxes will find windows from earlier
+.I mkxlax
+commands.
+.RS
+.\" .LP
+.nf
+example% mkxlax -group foo: host1 host2 host3
+\f1
+.fi
+.RE
+
+To lay out tiled, by row:
+.RS
+.\" .LP
+.nf
+example% mkxlax -dx 400 -wrapx 1000 -wrapdy 300 host1 host2 ...
+\f1
+.fi
+.RE
+
+To lay out tiled, by column:
+.RS
+.\" .LP
+.nf
+example% mkxlax -dy 300 -wrapy 700 -wrapdx 400 host1 host2 ...
+\f1
+.fi
+.RE
+
+.SH ENVIRONMENT
+.PP
+.TP 8
+.B DISPLAY
+To get default host and display number.
+
+.SH FILES
+.PD 0
+.TP
+.I $HOME/.mkxlax
+Layout customization information
+.PD
+.SH BUGS
+Probably something, but nothing that comes to mind.
+.SH SEE ALSO
+xterm(1), xlax(1)
+.SH COPYRIGHT
+Copyright 2007, Thomas A. Fine
+.br

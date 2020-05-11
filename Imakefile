@@ -1,0 +1,13 @@
+#Imakefile for xlax
+
+#   EXTRA_LOAD_FLAGS = -Bstatic
+#        CDEBUGFLAGS = -g
+#            DEFINES = -DDEBUG
+            DEPLIBS = XawClientDepLibs
+    LOCAL_LIBRARIES = XawClientLibs
+               SRCS = xlax.c
+               OBJS = xlax.o
+
+ComplexProgramTarget(xlax)
+
+

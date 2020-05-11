@@ -1,0 +1,118 @@
+.TH XLAX 1 "Release 5" "X Version 11"
+.SH NAME
+xlax - X window system program to send keyboard input to multiple windows
+.SH SYNOPSIS
+.B "xlax"
+[-find] [-prefix \fIstring\fP] [-\fItoolkit options\fP]
+.SH DESCRIPTION
+.PP
+.I Xlax
+is an X Window System program that will send keyboard input it
+receives to multiple selected windows.  When run, 
+.I Xlax
+will bring up its main window.  There will be six buttons on it,
+"Quit", "Add Windows", "Find xlax:", "Send String", "Paste", and "Kill Window."
+
+"Quit" will terminate 
+.I xlax
+and "Add windows" will change the cursor to a cross-hair and allow the
+user to select any window on the screen by pressing a mouse button.
+The user will be able to continue selecting windows until either the 
+.I xlax
+window or a window that has already been selected, is selected.
+
+When a window is selected, its name will appear in the 
+.I xlax
+window.  Clicking the mouse on the window name will toggle whether
+that window should receive input.  When the user types anywhere in the
+.I xlax 
+window, those keystrokes will be sent to all selected windows.
+
+"Kill Window" will allow the user to select a window and remove it from
+.I xlax's 
+list (note: the user must click on the actual window, not the name that
+appears in 
+.I xlax).
+
+There is a window to the right of each name, which may display text assigned
+to this window name.  When "Send String" is selected, the specific string
+associated with each window will be sent to those windows.  Clicking the first
+mouse button in this area will bring up a popup window that allows you to
+change the assigned text.  Up to 150 characters are allowed.  The software
+records all characters including backspace and carriage return, so there
+is no editing this field -- if you make a mistake, click on "Clear" to
+start over.
+
+The "Paste" button sends the currently (or most recently) selected text
+to all active windows.
+
+The "Find xlax:" button searches all X11 windows for those with a
+class hint that begins with "xlax:" (or alternately, a string specifed
+by the user with the -prefix option).  These windows are added automatically,
+and their sendstring is automatically set to whatever follows "xlax:" (or
+the alternate prefix value).
+
+This tool tends to be useful for system administration tasks that
+require almost the same thing to be done in several different 
+windows, but require some human intervention (e.g. some tape backups
+or building multiple servers).  The string area is useful for machine
+or platform specific strings (such as machine names or machine type).
+
+.SH EXAMPLES
+This starts up three xterms, and then xlax automatically finds them.
+.RS
+.\" .LP
+.nf
+example% xterm -xrm 'XTerm*allowSendEvents: true' -name xlax:string1 &
+[1] 555
+example% xterm -xrm 'XTerm*allowSendEvents: true' -name xlax:string2 &
+[2] 556
+example% xterm -xrm 'XTerm*allowSendEvents: true' -name xlax:string3 &
+[3] 557
+example% xlax -find
+\f1
+.fi
+.RE
+
+If you want more than one xlax, to automatically find different windows,
+specify a different prefix:
+.RS
+.\" .LP
+.nf
+example% xterm -xrm 'XTerm*allowSendEvents: true' -name foo:string1 &
+[1] 555
+example% xterm -xrm 'XTerm*allowSendEvents: true' -name foo:string2 &
+[2] 556
+example% xterm -xrm 'XTerm*allowSendEvents: true' -name bar:string3 &
+[3] 557
+example% xterm -xrm 'XTerm*allowSendEvents: true' -name bar:string3 &
+[4] 558
+example% xlax -prefix foo: -find &
+[5] 559
+example% xlax -prefix bar: -find &
+[6] 560
+\f1
+.fi
+.RE
+
+.SH ENVIRONMENT
+.PP
+.TP 8
+.B DISPLAY
+To get default host and display number.
+
+.SH CAVEATS
+For 
+.I xlax 
+to work on an xterm, "allowSendEvents" must be enabled on the 
+xterm.  Note that this means that anyone can send keystrokes
+to that xterm, so this should not be run in an insecure or
+unmonitored environment.
+
+.SH BUGS
+Probably something, but nothing that comes to mind.
+.SH SEE ALSO
+xterm(1)
+.SH COPYRIGHT
+Copyright 1992, Frank Adelstein.
+.br
